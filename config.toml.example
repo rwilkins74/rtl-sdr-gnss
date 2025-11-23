@@ -1,0 +1,111 @@
+# RTL-SDR GNSS Receiver Configuration
+# Copy this file to config.toml and adjust settings as needed
+
+[sdr]
+# Sample rate in Hz (typical: 2048000 or 4096000)
+sample_rate = 2048000
+
+# GPS L1 center frequency in Hz
+center_freq = 1575420000
+
+# Gain setting: "auto" for automatic gain control
+# or a specific value in dB (e.g., 40.0)
+# For RTL-SDR, typical range is 0-50 dB
+gain = "auto"
+
+# Frequency correction in PPM (parts per million)
+# Use rtl_test to determine your dongle's offset
+freq_correction = 0
+
+[acquisition]
+# Coherent integration time in milliseconds
+# Longer integration improves sensitivity but takes more time
+coherent_integration_ms = 1
+
+# Maximum Doppler shift to search in Hz
+# Depends on receiver dynamics:
+# - Stationary: 5000 Hz
+# - Vehicle: 10000 Hz
+# - Aircraft: 15000 Hz or more
+max_doppler_hz = 10000.0
+
+# Doppler frequency step in Hz
+# Smaller steps are more accurate but slower
+# Should be roughly 1/(integration_time)
+doppler_step_hz = 500.0
+
+# Acquisition threshold (peak-to-mean ratio)
+# Higher values reduce false positives but may miss weak signals
+# Typical range: 2.0-3.5
+threshold = 2.5
+
+[tracking]
+# DLL (Delay Lock Loop) bandwidth in Hz
+# Controls code tracking - lower is smoother but slower
+# Typical range: 1-4 Hz
+dll_bandwidth_hz = 2.0
+
+# PLL (Phase Lock Loop) bandwidth in Hz
+# Controls carrier phase tracking
+# Typical range: 15-30 Hz
+pll_bandwidth_hz = 25.0
+
+# FLL (Frequency Lock Loop) bandwidth in Hz
+# Controls carrier frequency tracking
+# Typical range: 3-10 Hz
+fll_bandwidth_hz = 5.0
+
+# Integration time in milliseconds
+# Longer improves sensitivity but reduces dynamic response
+integration_ms = 1
+
+# Early-late spacing in chips for DLL
+# Typical values: 0.5 (narrow) or 1.0 (wide)
+early_late_spacing = 0.5
+
+# Minimum C/N0 (carrier-to-noise) in dB-Hz
+# Satellites below this threshold are dropped
+# GPS signals are typically 35-50 dB-Hz
+min_cn0_db_hz = 25.0
+
+[navigation]
+# Minimum number of satellites required for position fix
+# 4 satellites minimum for 3D position + clock bias
+min_satellites = 4
+
+# Position update rate in Hz
+update_rate_hz = 1.0
+
+# Enable ionospheric corrections (Klobuchar model)
+use_iono_correction = true
+
+# Enable tropospheric corrections (Saastamoinen model)
+use_tropo_correction = true
+
+[sbas]
+# Enable SBAS (Satellite-Based Augmentation System) processing
+enabled = true
+
+# SBAS satellite PRNs to track
+# WAAS (North America): 131, 133, 135, 138
+# EGNOS (Europe): 120, 123, 136
+# MSAS (Japan): 129, 137
+# GAGAN (India): 127, 128
+prns = [131, 133, 135, 138]
+
+[output]
+# Enable NMEA 0183 output
+nmea_enabled = true
+
+# NMEA output rate in Hz
+nmea_rate_hz = 1.0
+
+# Enable JSON output
+json_enabled = true
+
+# JSON output rate in Hz
+json_rate_hz = 1.0
+
+# Enable PPS (Pulse Per Second) output
+# Generates a pulse aligned to GPS second boundaries
+pps_enabled = true

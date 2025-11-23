@@ -1,0 +1,26 @@
+# Rust
+/target/
+**/*.rs.bk
+*.pdb
+Cargo.lock
+
+# IDE
+.idea/
+.vscode/
+*.swp
+*.swo
+*~
+.DS_Store
+
+# Configuration (keep example)
+config.toml
+
+# Output files
+*.nmea
+*.json
+*.log
+
+# Build artifacts
+*.so
+*.dylib
+*.dll

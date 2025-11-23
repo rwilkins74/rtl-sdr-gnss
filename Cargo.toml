@@ -1,0 +1,60 @@
+[package]
+name = "rtl-sdr-gnss"
+version = "0.1.0"
+edition = "2021"
+authors = ["RTL-SDR GNSS Contributors"]
+description = "GPS receiver application using RTL-SDR"
+license = "MIT OR Apache-2.0"
+repository = "https://github.com/rwilkins74/rtl-sdr-gnss"
+
+[dependencies]
+# RTL-SDR interface
+rtlsdr = "0.1"
+
+# DSP and math
+rustfft = "6.1"
+num-complex = "0.4"
+nalgebra = "0.32"
+
+# Async runtime
+tokio = { version = "1.35", features = ["full"] }
+async-trait = "0.1"
+
+# Serialization
+serde = { version = "1.0", features = ["derive"] }
+serde_json = "1.0"
+
+# Configuration
+clap = { version = "4.4", features = ["derive"] }
+toml = "0.8"
+
+# UI
+ratatui = "0.25"
+crossterm = "0.27"
+
+# Logging
+tracing = "0.1"
+tracing-subscriber = { version = "0.3", features = ["env-filter"] }
+
+# Time handling
+chrono = "0.4"
+
+# Error handling
+thiserror = "1.0"
+anyhow = "1.0"
+
+# Signal processing utilities
+ndarray = "0.15"
+rand = "0.8"
+
+[profile.release]
+opt-level = 3
+lto = true
+codegen-units = 1
+
+[profile.dev]
+opt-level = 1
+
+[[bin]]
+name = "rtl-sdr-gnss"
+path = "src/main.rs"
