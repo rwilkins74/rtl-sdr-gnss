@@ -17,6 +17,12 @@ gain = "auto"
 # Use rtl_test to determine your dongle's offset
 freq_correction = 0
 
+# Enable bias-T voltage for powering active GPS antennas with LNA
+# WARNING: Only enable if your antenna requires power!
+# Do NOT enable with passive antennas - may damage equipment
+# Bias-T provides 3.3V or 5V (depending on dongle) through the antenna cable
+bias_tee = false
+
 [acquisition]
 # Coherent integration time in milliseconds
 # Longer integration improves sensitivity but takes more time

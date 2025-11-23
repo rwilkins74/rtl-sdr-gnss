@@ -22,6 +22,8 @@ pub struct SdrConfig {
     pub gain: GainMode,
     /// Frequency correction in PPM
     pub freq_correction: i32,
+    /// Enable bias-T voltage (for powering active GPS antennas)
+    pub bias_tee: bool,
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
@@ -101,6 +103,7 @@ impl Default for Config {
                 center_freq: GPS_L1_FREQ_HZ as u64,
                 gain: GainMode::Auto,
                 freq_correction: 0,
+                bias_tee: false,
             },
             acquisition: AcquisitionConfig {
                 coherent_integration_ms: ACQUISITION_COHERENT_MS,

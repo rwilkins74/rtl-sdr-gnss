@@ -29,6 +29,13 @@ A GPS receiver application built from scratch in Rust using RTL-SDR as the RF fr
   - **JSON**: Structured position and satellite data
   - **PPS**: Pulse-per-second output synchronized to GPS time
 
+- **RTL-SDR Hardware Support**
+  - Direct RTL-SDR device integration
+  - Configurable gain control (auto/manual)
+  - Frequency correction (PPM)
+  - **Bias-T support** for powering active GPS antennas
+  - Sample rate and center frequency configuration
+
 - **User Interface**
   - Real-time TUI showing satellite status, signal strength, and position
   - Headless mode for integration with other systems
@@ -123,9 +130,27 @@ rtl-sdr-gnss/
 ## Prerequisites
 
 - **Hardware**: RTL-SDR dongle (RTL2832U-based)
+  - RTL-SDR Blog V3 recommended (has bias-T support)
+  - Any RTL2832U + R820T/R820T2 tuner
 - **Antenna**: GPS antenna with LNA (required for weak GPS signals)
+  - Active antenna (powered via bias-T or external power)
+  - Passive antenna with external LNA
+  - Location: Clear view of sky recommended
 - **Rust**: Version 1.70 or later
 - **Operating System**: Linux (primary), macOS, Windows
+
+### Bias-T Support
+
+This receiver supports **bias-T** to power active GPS antennas directly through the coax cable.
+
+⚠️ **WARNING**: Only enable bias-T if your antenna requires it! Enabling bias-T on passive antennas may damage your equipment.
+
+**Bias-T compatible dongles:**
+- RTL-SDR Blog V3
+- Nooelec NESDR SMArt v4/v5
+- Other RTL-SDR dongles with bias-T support
+
+To enable bias-T, set `bias_tee = true` in config.toml. The receiver will provide power (typically 3.3V or 5V depending on dongle) to your antenna's LNA.
 
 ### System Dependencies
 

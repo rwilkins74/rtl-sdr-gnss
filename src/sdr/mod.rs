@@ -30,6 +30,12 @@ pub trait SdrSource: Send {
     /// Enable automatic gain control
     fn set_agc(&mut self, enable: bool) -> Result<()>;
 
+    /// Enable/disable bias-T voltage (for powering LNA in GPS antennas)
+    fn set_bias_tee(&mut self, enable: bool) -> Result<()>;
+
+    /// Set frequency correction in PPM
+    fn set_freq_correction(&mut self, ppm: i32) -> Result<()>;
+
     /// Get actual sample rate
     fn get_sample_rate(&self) -> u32;
 

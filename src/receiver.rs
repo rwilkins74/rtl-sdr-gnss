@@ -40,9 +40,15 @@ impl GnssReceiver {
 
         // Initialize SDR
         self.sdr.init().await?;
+
+        // Set frequency correction first
+        self.sdr.set_freq_correction(self.config.sdr.freq_correction)?;
+
+        // Set center frequency and sample rate
         self.sdr.set_frequency(self.config.sdr.center_freq)?;
         self.sdr.set_sample_rate(self.config.sdr.sample_rate)?;
 
+        // Configure gain
         match self.config.sdr.gain {
             crate::config::GainMode::Auto => {
                 self.sdr.set_agc(true)?;
@@ -52,6 +58,9 @@ impl GnssReceiver {
                 self.sdr.set_gain(gain)?;
             }
         }
+
+        // Enable bias-T if configured
+        self.sdr.set_bias_tee(self.config.sdr.bias_tee)?;
 
         self.sdr.start().await?;
 
