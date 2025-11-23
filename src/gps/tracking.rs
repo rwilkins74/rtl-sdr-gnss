@@ -106,16 +106,19 @@ impl Channel {
     /// Initialize channel with acquisition results
     pub fn initialize(&mut self, doppler_hz: f64, code_phase: usize) {
         self.carrier_freq = doppler_hz;
-        self.code_nco = code_phase as f64;
+        // CRITICAL: Convert code phase from samples to chips
+        // Acquisition returns sample index, but code_nco is in chips
+        self.code_nco = (code_phase as f64) / self.samples_per_chip;
         self.state = ChannelState::PullIn;
         self.lock_time_ms = 0;
         self.integration_count = 0;
 
         tracing::info!(
-            "Channel initialized for PRN {}: Doppler={:.1} Hz, Code Phase={}",
+            "Channel initialized for PRN {}: Doppler={:.1} Hz, Code Phase={} samples ({:.1} chips)",
             self.prn,
             doppler_hz,
-            code_phase
+            code_phase,
+            self.code_nco
         );
     }
 
