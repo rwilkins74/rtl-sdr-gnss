@@ -64,9 +64,20 @@ impl GnssReceiver {
 
         self.sdr.start().await?;
 
+        // Wait for device to be ready for streaming (RTL-SDR needs time to stabilize)
+        tracing::debug!("Waiting for SDR to stabilize...");
+        tokio::time::sleep(tokio::time::Duration::from_millis(500)).await;
+
+        // Flush initial samples (first read after start often contains stale data)
+        // Note: Buffer sizes must be multiples of 512 bytes for RTL-SDR USB transfers
+        // Each complex sample = 2 bytes, so we read in multiples of 256 samples
+        tracing::debug!("Flushing initial buffer...");
+        let _ = self.sdr.read_samples(2048).await; // 2048 samples = 4096 bytes (multiple of 512)
+        tokio::time::sleep(tokio::time::Duration::from_millis(50)).await;
+
         // Diagnostic: Read initial samples to verify reception
         tracing::info!("Reading initial samples for diagnostic...");
-        let test_samples = self.sdr.read_samples(10000).await?;
+        let test_samples = self.sdr.read_samples(10240).await?; // 10240 samples = 20480 bytes (multiple of 512)
         let power: f32 = test_samples.iter()
             .map(|s| s.norm_sqr())
             .sum::<f32>() / test_samples.len() as f32;
