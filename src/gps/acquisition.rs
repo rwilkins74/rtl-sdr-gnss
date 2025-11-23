@@ -30,14 +30,21 @@ impl Acquisition {
 
     /// Acquire a satellite signal
     pub fn acquire(&self, signal: &[Complex<f32>], prn: u8) -> Result<AcquisitionResult> {
-        tracing::debug!("Acquiring PRN {}", prn);
+        tracing::debug!("Acquiring PRN {} with {}ms coherent integration",
+                       prn, self.config.coherent_integration_ms);
 
-        let samples_per_code = (self.sample_rate * GPS_CA_CODE_LENGTH as f64
+        let samples_per_code_period = (self.sample_rate * GPS_CA_CODE_LENGTH as f64
             / GPS_CA_CHIPPING_RATE) as usize;
 
-        // Generate the C/A code for this PRN at the sample rate
-        let ca_code =
-            CaCodeGenerator::generate_sampled(prn, self.sample_rate, GPS_CA_CHIPPING_RATE);
+        // Use configured coherent integration time
+        let samples_per_code = samples_per_code_period * self.config.coherent_integration_ms;
+
+        // Generate the C/A code for this PRN at the sample rate, repeated for coherent integration
+        let mut ca_code = Vec::with_capacity(samples_per_code);
+        let single_code = CaCodeGenerator::generate_sampled(prn, self.sample_rate, GPS_CA_CHIPPING_RATE);
+        for _ in 0..self.config.coherent_integration_ms {
+            ca_code.extend_from_slice(&single_code);
+        }
 
         // Ensure we have enough signal samples
         let signal = if signal.len() >= samples_per_code {

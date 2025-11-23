@@ -28,7 +28,9 @@ bias_tee = false
 [acquisition]
 # Coherent integration time in milliseconds
 # Longer integration improves sensitivity but takes more time
-coherent_integration_ms = 1
+# GPS data bits are 20ms, so can integrate up to 20ms coherently
+# Recommended: 10ms for good sensitivity/speed tradeoff
+coherent_integration_ms = 10
 
 # Maximum Doppler shift to search in Hz
 # Depends on receiver dynamics:
