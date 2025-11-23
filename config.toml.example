@@ -11,7 +11,9 @@ center_freq = 1575420000
 # Gain setting: "auto" for automatic gain control
 # or a specific value in dB (e.g., 40.0)
 # For RTL-SDR, typical range is 0-50 dB
-gain = "auto"
+# IMPORTANT: GPS signals need HIGH gain! AGC often sets it too low.
+# Recommended: Start with 40-48 dB for GPS reception
+gain = 42.0
 
 # Frequency correction in PPM (parts per million)
 # Use rtl_test to determine your dongle's offset
@@ -43,7 +45,8 @@ doppler_step_hz = 500.0
 # Acquisition threshold (peak-to-mean ratio)
 # Higher values reduce false positives but may miss weak signals
 # Typical range: 2.0-3.5
-threshold = 2.5
+# Start with 2.0 for initial testing, increase if too many false positives
+threshold = 2.0
 
 [tracking]
 # DLL (Delay Lock Loop) bandwidth in Hz

@@ -133,16 +133,12 @@ impl Acquisition {
         prns: &[u8],
     ) -> Vec<AcquisitionResult> {
         let mut results = Vec::new();
-        let mut max_peak_to_mean = 0.0_f64;
-        let mut best_prn = 0_u8;
+        let mut all_results = Vec::new();
 
         for &prn in prns {
             if let Ok(result) = self.acquire(signal, prn) {
                 let peak_to_mean = result.peak_metric / result.mean_metric.max(1e-10);
-                if peak_to_mean > max_peak_to_mean {
-                    max_peak_to_mean = peak_to_mean;
-                    best_prn = prn;
-                }
+                all_results.push((prn, peak_to_mean, result.doppler_hz, result.acquired));
 
                 if result.acquired {
                     results.push(result);
@@ -150,13 +146,22 @@ impl Acquisition {
             }
         }
 
-        if results.is_empty() && prns.len() > 0 {
+        // Sort by peak-to-mean ratio and show top 5
+        all_results.sort_by(|a, b| b.1.partial_cmp(&a.1).unwrap());
+
+        if results.is_empty() && !all_results.is_empty() {
+            let top5: Vec<String> = all_results.iter()
+                .take(5)
+                .map(|(prn, ratio, doppler, _)| format!("PRN{}({:.2}@{:.0}Hz)", prn, ratio, doppler))
+                .collect();
+
             tracing::info!(
-                "No satellites acquired (best: PRN {} with peak/mean={:.2}, need {:.2})",
-                best_prn,
-                max_peak_to_mean,
+                "No satellites acquired. Top 5 correlations: {} (need {:.2})",
+                top5.join(", "),
                 self.config.threshold
             );
+        } else if !results.is_empty() {
+            tracing::info!("Acquired {} satellite(s)", results.len());
         }
 
         results

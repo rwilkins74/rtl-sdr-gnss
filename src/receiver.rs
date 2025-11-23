@@ -64,6 +64,27 @@ impl GnssReceiver {
 
         self.sdr.start().await?;
 
+        // Diagnostic: Read initial samples to verify reception
+        tracing::info!("Reading initial samples for diagnostic...");
+        let test_samples = self.sdr.read_samples(10000).await?;
+        let power: f32 = test_samples.iter()
+            .map(|s| s.norm_sqr())
+            .sum::<f32>() / test_samples.len() as f32;
+        let power_db = 10.0 * power.log10();
+
+        tracing::info!(
+            "Signal diagnostics: {} samples, avg power = {:.2e} ({:.1} dB)",
+            test_samples.len(), power, power_db
+        );
+
+        if power < 1e-6 {
+            tracing::warn!("Signal power very low! Check antenna connection and bias-T.");
+        } else if power > 0.1 {
+            tracing::warn!("Signal power very high! AGC or gain may be set incorrectly.");
+        } else {
+            tracing::info!("Signal power looks reasonable for GPS reception");
+        }
+
         if self.config.output.pps_enabled {
             self.pps.enable();
         }
