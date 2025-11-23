@@ -106,9 +106,9 @@ impl Channel {
     /// Initialize channel with acquisition results
     pub fn initialize(&mut self, doppler_hz: f64, code_phase: usize) {
         self.carrier_freq = doppler_hz;
-        // CRITICAL: Convert code phase from samples to chips
-        // Acquisition returns sample index, but code_nco is in chips
-        self.code_nco = (code_phase as f64) / self.samples_per_chip;
+        // CRITICAL: Convert code phase from samples to chips and wrap at 1023
+        // Acquisition returns sample index (0-40920 for 20ms integration), but code_nco is in chips (0-1023)
+        self.code_nco = ((code_phase as f64) / self.samples_per_chip) % (GPS_CA_CODE_LENGTH as f64);
         self.state = ChannelState::PullIn;
         self.lock_time_ms = 0;
         self.integration_count = 0;
