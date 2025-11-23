@@ -133,13 +133,30 @@ impl Acquisition {
         prns: &[u8],
     ) -> Vec<AcquisitionResult> {
         let mut results = Vec::new();
+        let mut max_peak_to_mean = 0.0_f64;
+        let mut best_prn = 0_u8;
 
         for &prn in prns {
             if let Ok(result) = self.acquire(signal, prn) {
+                let peak_to_mean = result.peak_metric / result.mean_metric.max(1e-10);
+                if peak_to_mean > max_peak_to_mean {
+                    max_peak_to_mean = peak_to_mean;
+                    best_prn = prn;
+                }
+
                 if result.acquired {
                     results.push(result);
                 }
             }
+        }
+
+        if results.is_empty() && prns.len() > 0 {
+            tracing::info!(
+                "No satellites acquired (best: PRN {} with peak/mean={:.2}, need {:.2})",
+                best_prn,
+                max_peak_to_mean,
+                self.config.threshold
+            );
         }
 
         results

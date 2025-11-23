@@ -130,6 +130,18 @@ impl GnssReceiver {
         let samples_per_ms = self.config.sdr.sample_rate / 1000;
         let samples = self.sdr.read_samples(samples_per_ms as usize * 10).await?;
 
+        // Compute sample power for diagnostics
+        static mut CYCLE_COUNT: u64 = 0;
+        unsafe {
+            CYCLE_COUNT += 1;
+            if CYCLE_COUNT % 100 == 0 {
+                let power: f32 = samples.iter()
+                    .map(|s| s.norm_sqr())
+                    .sum::<f32>() / samples.len() as f32;
+                tracing::debug!("Sample power: {:.2e}, samples: {}", power, samples.len());
+            }
+        }
+
         // Acquisition phase - search for new satellites
         if self.channels.len() < 12 {
             self.acquire_satellites(&samples).await?;
@@ -159,7 +171,7 @@ impl GnssReceiver {
             return Ok(());
         }
 
-        tracing::debug!("Searching for satellites: {:?}", prns_to_search);
+        tracing::info!("Searching for {} satellites...", prns_to_search.len());
 
         let results = acquisition.acquire_all(samples, &prns_to_search).await;
 
