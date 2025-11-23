@@ -158,9 +158,10 @@ impl GnssReceiver {
     }
 
     async fn process_cycle(&mut self) -> Result<()> {
-        // Read samples
+        // Read samples - need enough for coherent integration
         let samples_per_ms = self.config.sdr.sample_rate / 1000;
-        let samples = self.sdr.read_samples(samples_per_ms as usize * 10).await?;
+        let integration_ms = self.config.acquisition.coherent_integration_ms;
+        let samples = self.sdr.read_samples(samples_per_ms as usize * integration_ms).await?;
 
         // Compute sample power for diagnostics
         static mut CYCLE_COUNT: u64 = 0;
