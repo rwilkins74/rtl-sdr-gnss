@@ -165,8 +165,8 @@ impl Channel {
         // Estimate CN0
         self.estimate_cn0(integration_time_s);
 
-        // Check lock status
-        if self.cn0_db_hz < self.config.min_cn0_db_hz {
+        // Check lock status (but not during initial pull-in before we have enough samples)
+        if self.prompt_history.len() >= 10 && self.cn0_db_hz < self.config.min_cn0_db_hz {
             tracing::warn!("PRN {} lost lock: CN0={:.1} dB-Hz", self.prn, self.cn0_db_hz);
             self.state = ChannelState::Lost;
             return Err(Error::TrackingLost(self.prn));
@@ -175,7 +175,15 @@ impl Channel {
         // Transition from pull-in to tracking
         if self.state == ChannelState::PullIn && self.lock_time_ms > 100 {
             self.state = ChannelState::Tracking;
-            tracing::info!("PRN {} locked and tracking", self.prn);
+            tracing::info!("PRN {} locked and tracking (CN0={:.1} dB-Hz)", self.prn, self.cn0_db_hz);
+        }
+
+        // Periodic status update
+        if self.integration_count % 1000 == 0 && self.state == ChannelState::Tracking {
+            tracing::debug!(
+                "PRN {} tracking: CN0={:.1} dB-Hz, Doppler={:.1} Hz, Code freq={:.3} Hz",
+                self.prn, self.cn0_db_hz, self.carrier_freq, self.code_freq
+            );
         }
 
         self.lock_time_ms += self.config.integration_ms as u64;
