@@ -196,13 +196,31 @@ impl SdrSource for RtlSdrSource {
     }
 
     fn set_freq_correction(&mut self, ppm: i32) -> Result<()> {
-        if let Some(ref mut device) = self.device {
-            device.0
-                .set_freq_correction(ppm)
-                .map_err(|e| Error::RtlSdr(format!("Failed to set frequency correction: {:?}", e)))?;
+        // Skip if no correction needed
+        if ppm == 0 {
+            tracing::info!("Frequency correction set to 0 PPM (no correction)");
+            return Ok(());
+        }
 
-            tracing::info!("Frequency correction set to {} PPM", ppm);
-            Ok(())
+        if let Some(ref mut device) = self.device {
+            match device.0.set_freq_correction(ppm) {
+                Ok(()) => {
+                    tracing::info!("Frequency correction set to {} PPM", ppm);
+                    Ok(())
+                }
+                Err(e) => {
+                    // Some devices/tuners don't support frequency correction
+                    // Log a warning but don't fail
+                    tracing::warn!(
+                        "Failed to set frequency correction to {} PPM: {:?}",
+                        ppm, e
+                    );
+                    tracing::warn!(
+                        "This may be normal for some RTL-SDR devices/tuners. Continuing without correction."
+                    );
+                    Ok(())
+                }
+            }
         } else {
             Err(Error::RtlSdr("Device not initialized".to_string()))
         }

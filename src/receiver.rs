@@ -41,12 +41,12 @@ impl GnssReceiver {
         // Initialize SDR
         self.sdr.init().await?;
 
-        // Set frequency correction first
-        self.sdr.set_freq_correction(self.config.sdr.freq_correction)?;
-
-        // Set center frequency and sample rate
+        // Set center frequency and sample rate FIRST
         self.sdr.set_frequency(self.config.sdr.center_freq)?;
         self.sdr.set_sample_rate(self.config.sdr.sample_rate)?;
+
+        // Set frequency correction after frequency/sample rate
+        self.sdr.set_freq_correction(self.config.sdr.freq_correction)?;
 
         // Configure gain
         match self.config.sdr.gain {
