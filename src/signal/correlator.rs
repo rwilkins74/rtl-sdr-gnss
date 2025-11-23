@@ -52,10 +52,13 @@ impl Correlator {
         let n = signal.len();
         let code_len = code.len();
 
+        // Convert code phase from chips to samples
+        let code_phase_samples = code_phase_chips * samples_per_chip;
+
         for i in 0..n {
-            // Calculate which code chip this sample corresponds to
-            let code_pos = (i as f64 / samples_per_chip + code_phase_chips) % (code_len as f64);
-            let code_idx = code_pos as usize % code_len;
+            // Calculate code position in samples (keeping everything in sample units!)
+            let code_pos_samples = (i as f64 + code_phase_samples) % (code_len as f64);
+            let code_idx = code_pos_samples as usize % code_len;
 
             sum += signal[i] * code[code_idx];
         }

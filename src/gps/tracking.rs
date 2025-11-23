@@ -132,10 +132,11 @@ impl Channel {
         let signal_baseband = self.carrier_wipeoff(signal);
 
         // Correlate with E/P/L codes
+        // code_nco is in chips, which is what correlate_epl expects
         let (early, prompt, late) = self.correlator.correlate_epl(
             &signal_baseband,
             &self.ca_code,
-            self.code_nco / self.samples_per_chip,
+            self.code_nco,  // Already in chips!
             self.samples_per_chip,
         );
 
