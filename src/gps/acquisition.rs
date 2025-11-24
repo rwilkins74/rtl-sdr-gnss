@@ -33,6 +33,19 @@ impl Acquisition {
         tracing::debug!("Acquiring PRN {} with {}ms coherent integration",
                        prn, self.config.coherent_integration_ms);
 
+        // On first PRN, show signal diagnostics
+        if prn == 1 {
+            let power: f32 = signal.iter().map(|s| s.norm_sqr()).sum::<f32>() / signal.len() as f32;
+            let dc_i: f32 = signal.iter().map(|s| s.re).sum::<f32>() / signal.len() as f32;
+            let dc_q: f32 = signal.iter().map(|s| s.im).sum::<f32>() / signal.len() as f32;
+            let dc_offset = (dc_i * dc_i + dc_q * dc_q).sqrt();
+
+            tracing::info!(
+                "Signal diagnostics: power={:.2e}, DC_offset={:.2e} (I={:.2e}, Q={:.2e}), samples={}",
+                power, dc_offset, dc_i, dc_q, signal.len()
+            );
+        }
+
         let samples_per_code_period = (self.sample_rate * GPS_CA_CODE_LENGTH as f64
             / GPS_CA_CHIPPING_RATE) as usize;
 
