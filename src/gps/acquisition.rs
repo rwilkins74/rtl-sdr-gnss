@@ -115,11 +115,13 @@ impl Acquisition {
                 peak_to_mean
             );
         } else {
-            tracing::debug!(
-                "PRN {} not acquired: peak/mean={:.2} < {:.2}",
+            tracing::info!(
+                "PRN {} not acquired: peak/mean={:.2} < {:.2} (peak={:.3e}, mean={:.3e})",
                 prn,
                 peak_to_mean,
-                self.config.threshold
+                self.config.threshold,
+                best_metric,
+                mean_metric
             );
         }
 
