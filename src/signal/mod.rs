@@ -59,7 +59,8 @@ pub fn carrier_wipeoff(
         .map(|(i, &s)| {
             let phase = 2.0 * std::f64::consts::PI * carrier_freq * (i as f64) / sample_rate
                 + phase_offset;
-            let carrier = Complex::new(phase.cos() as f32, -phase.sin() as f32);
+            // Try positive sine - maybe we need e^(jφ) instead of e^(-jφ)
+            let carrier = Complex::new(phase.cos() as f32, phase.sin() as f32);
             s * carrier
         })
         .collect()
