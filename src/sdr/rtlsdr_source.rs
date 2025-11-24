@@ -39,8 +39,8 @@ impl RtlSdrSource {
                 // RTL-SDR gives unsigned 8-bit IQ, convert to signed float
                 let i = (iq[0] as f32 - 127.5) / 127.5;
                 let q = (iq[1] as f32 - 127.5) / 127.5;
-                // Try swapping I and Q - maybe byte order is reversed
-                Complex::new(q, i)
+                // Try swapped and conjugated: Q + j*(-I)
+                Complex::new(q, -i)
             })
             .collect()
     }
